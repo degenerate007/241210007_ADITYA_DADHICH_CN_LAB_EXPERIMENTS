@@ -1,0 +1,81 @@
+EXPERIMENT 11 - SOCKET PROGRAMMING (Multi-client server)  (Packet Tracer: Exp11_Socket_Programming.pkt + Python)
+=================================================================================================================
+
+
+########## PART A : PACKET TRACER ##########
+
+TOPOLOGY: Server0 (Switch Fa0/1), Client1 (Fa0/2), Client2 (Fa0/3), Client3 (Fa0/4). Straight cables.
+
+=== SERVER0 : Desktop > IP Configuration ===
+IP Address      : 10.10.10.10
+Subnet Mask     : 255.255.255.0
+Default Gateway : (leave empty)
+
+=== CLIENT1 ===
+IP Address      : 10.10.10.1
+Subnet Mask     : 255.255.255.0
+
+=== CLIENT2 ===
+IP Address      : 10.10.10.2
+Subnet Mask     : 255.255.255.0
+
+=== CLIENT3 ===
+IP Address      : 10.10.10.3
+Subnet Mask     : 255.255.255.0
+
+=== Server0 > Services > HTTP -> ON ===
+
+=== CLIENT1 / CLIENT2 / CLIENT3 : Desktop > Command Prompt ===
+
+ping 10.10.10.10
+Pinging 10.10.10.10 with 32 bytes of data:
+Request timed out.
+Reply from 10.10.10.10: bytes=32 time<1ms TTL=128
+Reply from 10.10.10.10: bytes=32 time<1ms TTL=128
+Reply from 10.10.10.10: bytes=32 time<1ms TTL=128
+Ping statistics for 10.10.10.10:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss)
+
+=== Each client : Desktop > Web Browser -> http://10.10.10.10 -> Go ===
+Web page opens (request-response on TCP port 80).
+
+
+########## PART B : PYTHON (threaded server) ##########
+(if "python3" is not found use "python")
+
+STEP 1  Open 4 terminals. In each one:
+        cd 11_Socket_Programming
+
+TERMINAL 1 (server FIRST):
+python3 threaded_server.py
+[Server] Listening on 127.0.0.1:7000
+
+TERMINAL 2:
+python3 client.py Alice "hello network"
+[Alice] Welcome Alice! Send text, I will return it in UPPERCASE.
+[Alice] Reply: HELLO NETWORK
+
+TERMINAL 3:
+python3 client.py Bob "sockets are fun"
+[Bob] Welcome Bob! Send text, I will return it in UPPERCASE.
+[Bob] Reply: SOCKETS ARE FUN
+
+TERMINAL 4:
+python3 client.py Carol "tcp and udp"
+[Carol] Welcome Carol! Send text, I will return it in UPPERCASE.
+[Carol] Reply: TCP AND UDP
+
+TERMINAL 1 (server) now shows:
+[Server] Listening on 127.0.0.1:7000
+[Server] Alice connected from port 56004
+[Server] Alice says: hello network
+[Server] Alice disconnected
+[Server] Bob connected from port 56005
+[Server] Bob says: sockets are fun
+[Server] Bob disconnected
+[Server] Carol connected from port 56006
+[Server] Carol says: tcp and udp
+[Server] Carol disconnected
+
+(port numbers differ every run. Server stops by itself after 3 clients.
+ Run clients one after another, server must be running first.)

@@ -1,0 +1,96 @@
+EXPERIMENT 6 - ROUTER CONFIGURATION  (Packet Tracer: Exp06_Router_Configuration.pkt)
+===================================================================================
+
+TOPOLOGY: PC_00 --- Router2 (Gi0/0) ; Router2 (Gi0/1) --- PC_01
+Cable: PC <-> Router = crossover.
+
+
+=== ROUTER2 (click router -> CLI tab) ===
+(if asked initial configuration dialog -> type: no)
+
+enable
+configure terminal
+hostname Router2
+interface GigabitEthernet0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+exit
+interface GigabitEthernet0/1
+ip address 192.168.2.1 255.255.255.0
+no shutdown
+end
+write memory
+
+OUTPUT:
+%LINK-5-CHANGED: Interface GigabitEthernet0/0, changed state to up
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0, changed state to up
+Building configuration...
+[OK]
+
+
+=== PC_00 : Desktop > IP Configuration ===
+IP Address      : 192.168.1.2
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.1.1
+
+=== PC_01 ===
+IP Address      : 192.168.2.2
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.2.1
+
+
+=== ROUTER2 CLI : verify ===
+
+show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+GigabitEthernet0/0     192.168.1.1     YES manual up                    up
+GigabitEthernet0/1     192.168.2.1     YES manual up                    up
+Vlan1                  unassigned      YES unset  administratively down down
+
+show ip route
+C    192.168.1.0/24 is directly connected, GigabitEthernet0/0
+C    192.168.2.0/24 is directly connected, GigabitEthernet0/1
+
+show running-config
+(shows hostname Router2 + both interface IPs)
+
+
+=== PC_00 : Desktop > Command Prompt ===
+
+ping 192.168.1.1
+Reply from 192.168.1.1: bytes=32 time<1ms TTL=255   (x4 or x3)
+
+ping 192.168.2.2
+Pinging 192.168.2.2 with 32 bytes of data:
+Request timed out.
+Reply from 192.168.2.2: bytes=32 time<1ms TTL=127
+Reply from 192.168.2.2: bytes=32 time<1ms TTL=127
+Reply from 192.168.2.2: bytes=32 time<1ms TTL=127
+Ping statistics for 192.168.2.2:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss)
+    Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+
+=== OPTIONAL : secure router (only if asked) ===
+configure terminal
+enable secret cisco123
+line console 0
+password cisco
+login
+exit
+banner motd #Authorized access only#
+service password-encryption
+end
+write memory
+
+=== OPTIONAL : exercise (shutdown test) ===
+configure terminal
+interface gig0/1
+shutdown
+end
+show ip route          -> only 192.168.1.0 route remains
+ping 192.168.2.2         -> Destination host unreachable
+configure terminal
+interface gig0/1
+no shutdown

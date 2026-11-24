@@ -1,0 +1,82 @@
+EXPERIMENT 5 - LAN CONNECTION  (Packet Tracer: Exp05_LAN_Connection.pkt)
+========================================================================
+
+TOPOLOGY: 1 Switch (2960) + 4 PCs. Straight-through cables.
+   PC0 -> Switch Fa0/1
+   PC1 -> Switch Fa0/2
+   PC2 -> Switch Fa0/3
+   PC3 -> Switch Fa0/4
+Wait until all link lights turn green (about 30 sec).
+
+
+=== PC0 : Desktop > IP Configuration (Static) ===
+IP Address      : 192.168.10.1
+Subnet Mask     : 255.255.255.0
+Default Gateway : (leave empty)
+
+=== PC1 ===
+IP Address      : 192.168.10.2
+Subnet Mask     : 255.255.255.0
+
+=== PC2 ===
+IP Address      : 192.168.10.3
+Subnet Mask     : 255.255.255.0
+
+=== PC3 ===
+IP Address      : 192.168.10.4
+Subnet Mask     : 255.255.255.0
+
+
+=== PC0 : Desktop > Command Prompt ===
+
+ipconfig
+   IPv4 Address....................: 192.168.10.1
+   Subnet Mask.....................: 255.255.255.0
+
+ping 192.168.10.2
+Reply from 192.168.10.2: bytes=32 time<1ms TTL=128   (x3 or x4, first may time out)
+
+ping 192.168.10.3
+Reply from 192.168.10.3: bytes=32 time<1ms TTL=128
+
+ping 192.168.10.4
+Pinging 192.168.10.4 with 32 bytes of data:
+Request timed out.
+Reply from 192.168.10.4: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.4: bytes=32 time<1ms TTL=128
+Reply from 192.168.10.4: bytes=32 time<1ms TTL=128
+Ping statistics for 192.168.10.4:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss)
+    Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+arp -a
+  Internet Address      Physical Address      Type
+  192.168.10.2          xxxx.xxxx.xxxx        dynamic
+  192.168.10.3          xxxx.xxxx.xxxx        dynamic
+  192.168.10.4          xxxx.xxxx.xxxx        dynamic
+
+
+=== PC3 : Desktop > Command Prompt ===
+
+ping 192.168.10.1
+Reply from 192.168.10.1: bytes=32 time<1ms TTL=128   (x3 or x4)
+
+
+=== SWITCH0 : click Switch0 -> CLI tab ===
+
+enable
+show mac address-table
+          Mac Address Table
+-------------------------------------------
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+   1    xxxx.xxxx.xxxx    DYNAMIC     Fa0/1
+   1    xxxx.xxxx.xxxx    DYNAMIC     Fa0/2
+   1    xxxx.xxxx.xxxx    DYNAMIC     Fa0/3
+   1    xxxx.xxxx.xxxx    DYNAMIC     Fa0/4
+
+(ping all PCs first, otherwise table may show fewer entries)
+
+show interfaces status
+(shows Fa0/1 - Fa0/4 as "connected")

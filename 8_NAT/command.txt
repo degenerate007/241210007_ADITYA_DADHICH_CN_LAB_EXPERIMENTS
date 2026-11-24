@@ -1,0 +1,97 @@
+EXPERIMENT 8 - NAT (PAT / Overload)  (Packet Tracer: Exp08_NAT.pkt)
+==================================================================
+
+TOPOLOGY: PC0 (Switch Fa0/1), PC1 (Switch Fa0/2), Router0 Gi0/0 (Switch Fa0/3)
+          Router0 Gi0/1 --- Server0 (crossover cable)
+Gi0/0 = INSIDE (private)   Gi0/1 = OUTSIDE (public)
+
+
+=== SERVER0 : Desktop > IP Configuration ===
+IP Address      : 203.0.113.2
+Subnet Mask     : 255.255.255.0
+Default Gateway : 203.0.113.1
+
+=== PC0 : Desktop > IP Configuration ===
+IP Address      : 192.168.1.2
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.1.1
+
+=== PC1 ===
+IP Address      : 192.168.1.3
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.1.1
+
+
+=== ROUTER0 (click Router0 -> CLI tab) ===
+(if asked initial configuration dialog -> type: no)
+
+enable
+configure terminal
+interface GigabitEthernet0/0
+ip address 192.168.1.1 255.255.255.0
+ip nat inside
+no shutdown
+exit
+interface GigabitEthernet0/1
+ip address 203.0.113.1 255.255.255.0
+ip nat outside
+no shutdown
+exit
+access-list 1 permit 192.168.1.0 0.0.0.255
+ip nat inside source list 1 interface GigabitEthernet0/1 overload
+end
+write memory
+
+OUTPUT:
+%LINK-5-CHANGED: Interface GigabitEthernet0/0, changed state to up
+%LINK-5-CHANGED: Interface GigabitEthernet0/1, changed state to up
+Building configuration...
+[OK]
+
+
+=== PC0 : Desktop > Command Prompt ===
+
+ping 203.0.113.2
+Pinging 203.0.113.2 with 32 bytes of data:
+Request timed out.
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=127
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=127
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=127
+Ping statistics for 203.0.113.2:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss)
+    Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+=== PC1 : Desktop > Command Prompt ===
+
+ping 203.0.113.2
+(same kind of reply, TTL=127)
+
+
+=== ROUTER0 CLI : verify (do this right after the pings) ===
+
+show ip nat translations
+Pro  Inside global       Inside local        Outside local      Outside global
+icmp 203.0.113.1:1       192.168.1.2:1       203.0.113.2:1      203.0.113.2:1
+icmp 203.0.113.1:2       192.168.1.3:2       203.0.113.2:2      203.0.113.2:2
+
+(port numbers may differ on your system)
+
+show ip nat statistics
+(shows: Outside interfaces: GigabitEthernet0/1 | Inside interfaces: GigabitEthernet0/0 | Hits, Misses)
+
+clear ip nat translation *
+
+
+=== OPTIONAL : STATIC NAT ===
+configure terminal
+ip nat inside source static 192.168.1.2 203.0.113.10
+
+=== OPTIONAL : DYNAMIC NAT (use INSTEAD of overload line) ===
+ip nat pool PUBLIC 203.0.113.10 203.0.113.20 netmask 255.255.255.0
+access-list 1 permit 192.168.1.0 0.0.0.255
+ip nat inside source list 1 pool PUBLIC
+
+=== SIMULATION MODE ===
+Simulation -> ICMP filter -> PC0 ping 203.0.113.2 -> Capture/Forward
+Click packet at Router0 : source changes 192.168.1.2 -> 203.0.113.1

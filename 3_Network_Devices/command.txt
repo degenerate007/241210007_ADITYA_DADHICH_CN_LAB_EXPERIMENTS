@@ -1,0 +1,92 @@
+EXPERIMENT 3 - NETWORK DEVICES  (Packet Tracer: Exp03_Network_Devices.pkt)
+=========================================================================
+
+TOPOLOGY: PC0, PC1 --- Switch0 --- Router0 (Gi0/0)
+          Router0 (Gi0/1) --- Hub0 --- PC2, PC3, Server0
+Cables: all straight-through (switch/hub/router).
+Place: 1 Switch 2960, 1 Router 1941, 1 Hub-PT, 4 PCs, 1 Server.
+
+
+=== ROUTER0 (click Router0 -> CLI tab) ===
+(if asked initial configuration dialog -> type: no)
+
+enable
+configure terminal
+interface gig0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+exit
+interface gig0/1
+ip address 192.168.2.1 255.255.255.0
+no shutdown
+end
+write memory
+
+
+=== PC0 : Desktop > IP Configuration ===
+IP Address      : 192.168.1.2
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.1.1
+
+=== PC1 ===
+IP Address      : 192.168.1.3
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.1.1
+
+=== PC2 ===
+IP Address      : 192.168.2.2
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.2.1
+
+=== PC3 ===
+IP Address      : 192.168.2.3
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.2.1
+
+=== SERVER0 ===
+IP Address      : 192.168.2.10
+Subnet Mask     : 255.255.255.0
+Default Gateway : 192.168.2.1
+
+
+=== PC0 : Desktop > Command Prompt ===
+
+ping 192.168.1.3          (through switch)
+Reply from 192.168.1.3: bytes=32 time<1ms TTL=128   (x4)
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)
+
+
+ping 192.168.2.2          (through router)
+Pinging 192.168.2.2 with 32 bytes of data:
+Request timed out.
+Reply from 192.168.2.2: bytes=32 time<1ms TTL=127
+Reply from 192.168.2.2: bytes=32 time<1ms TTL=127
+Reply from 192.168.2.2: bytes=32 time<1ms TTL=127
+Ping statistics for 192.168.2.2:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss)
+    Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+
+=== PC2 : Desktop > Command Prompt ===
+
+ping 192.168.2.10         (through hub)
+Reply from 192.168.2.10: bytes=32 time<1ms TTL=128   (x3 or x4)
+
+
+=== SIMULATION MODE (to show hub vs switch) ===
+1. Click "Simulation" (bottom right) -> Edit Filters -> keep only ICMP, ARP.
+2. PC2 -> ping 192.168.2.10 -> press Capture/Forward:
+   Hub repeats frame to ALL ports.
+3. PC0 -> ping 192.168.1.3 -> Capture/Forward:
+   Switch sends only to the destination port (after learning).
+
+
+=== VERIFY ON SWITCH (optional) ===
+enable
+show mac address-table
+          Mac Address Table
+Vlan    Mac Address       Type        Ports
+   1    xxxx.xxxx.xxxx    DYNAMIC     Fa0/1
+   1    xxxx.xxxx.xxxx    DYNAMIC     Fa0/2
+   1    xxxx.xxxx.xxxx    DYNAMIC     Fa0/3
